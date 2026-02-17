@@ -4,8 +4,7 @@ title: "Welcome"
 
 ## Hi, I’m Nishil 
 
-I’m a Computer Science student with interests in data science, geospatial analysis, and urban/transportation applications.
-
-This website is for EPPS 6323 - Knowledge Mining, where I’ll be sharing: Course reflections, Projects, and Data viz work
+I’m a Computer Science and GIS student with interests in machine learning and geospatial analysis in civic and social applications.
+This website is for EPPS 6323 - Knowledge Mining, where I’ll be sharing: Course reflections, Projects, and Research.
 
 Stay tuned!

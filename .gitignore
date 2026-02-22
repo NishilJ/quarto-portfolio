@@ -1,7 +1,15 @@
-.Rproj.user
+# RStudio
+.Rproj.user/
+*.Rproj
 .Rhistory
 .RData
 .Ruserdata
 
-/.quarto/
+# Quarto cache
+.quarto/
 **/*.quarto_ipynb
+
+# OS junk
+.DS_Store
+Thumbs.db
+/.quarto/

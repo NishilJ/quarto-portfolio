@@ -10,7 +10,6 @@ website:
         text: Home
       - href: cv.pdf
         text: CV
-
       - href: labs.qmd
         text: Labs
       - href: assignments.qmd
@@ -19,7 +18,6 @@ website:
         text: Project      
       - href: about.qmd
         text: About
-
         
 format:
   html:

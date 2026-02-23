@@ -1,0 +1,13 @@
+---
+title: "Labs"
+---
+
+Welcome to my labs page! Here you can find all the lab exercises I’ve completed in Knowledge Mining this semester.
+*More labs will be added as the semester progresses.*
+
+## Labs
+
+- [Lab 1: R programming basics I](labs/Lab01.qmd)
+- [Lab 2: R programming basics II](labs/Lab02.qmd)
+
+---

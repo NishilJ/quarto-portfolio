@@ -8,22 +8,19 @@ website:
     right:
       - href: index.qmd
         text: Home
-      - href: about.qmd
-        text: About
-      - href: research.qmd
-        text: Research
-      - href: project.qmd
-        text: Project
       - href: cv.pdf
         text: CV
-      - text: Assignments
-        menu:
-          - href: as1.qmd
-            text: Assignment 1
-          - href: as1.qmd
-            text: Assignment 2
-          - href: as3.qmd
-            text: Assignment 3
+
+      - href: labs.qmd
+        text: Labs
+      - href: assignments.qmd
+        text: Assignments
+      - href: project.qmd
+        text: Project      
+      - href: about.qmd
+        text: About
+
+        
 format:
   html:
     theme:

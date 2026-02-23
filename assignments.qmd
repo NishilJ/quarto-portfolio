@@ -1,0 +1,11 @@
+---
+title: "Assignments"
+---
+
+Welcome to my assignments page! Here you can find all the assignments I’ve completed in Knowledge Mining this semester.
+*More assignments will be added as the semester progresses.*
+
+## Labs
+
+- [Assignment 1 – Brush up R and Quarto](assignments/as01.qmd)
+- [Assignment 2: Prompt exercise](assignments/as02.qmd)

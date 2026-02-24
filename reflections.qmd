@@ -1,0 +1,33 @@
+---
+title: "Weekly Reflections"
+format: html
+---
+
+## Week 3 (2/3/26)
+
+#### AI and originality
+
+I think AI and the current state of LLMs is not original. Originality is driven by the subjective human experience, our goals, our struggles, our survival. AI is simply learning patterns from a corpera of data and predicting the next best thing. While different prompts may provide different outputs it is still more of a derivative work rather than original work.
+
+#### What is AGI? How does AGI affect scientific research?
+
+AGI is the idea that we can make AI systems broadly smart enough, that they can exist autonomously with the level of human intelligence or possibly even beyond that. AGI, if it were to come to fruition, would drastically change our rate of scientific discovery. It could streamline the entire discovery pipeline of literature review, finding gaps, hypothesizing novel ideas, etc.
+
+## Week 4 (2/10/26)
+
+#### How to start using AI for your project?
+
+Apart from the actual methods I end up using in my project, AI can assist me with things like literature review and coding.
+
+#### Which two AI models are you using? How can you leverage them to help your research?
+
+ChatGPT will be my general purpose model and I will use Windsurf and Github Copilot for coding.
+
+## Week 5 (2/17/26)
+
+#### How do human find knowledge? How knowledge is different from information?
+
+This relates to the concept of originality. Humans find and create knowledge from our lived experiences and insights and contextualization. Knowledge is complex, holds deep context and exists only in our brains while information is data that can exist outside of us in for example written text.
+
+#### Put together a list of AI discrepancies/failures. Any pattern?
+

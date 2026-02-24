@@ -10,6 +10,8 @@ website:
         text: Home
       - href: cv.pdf
         text: CV
+      - href: reflections.qmd
+        text: Reflections
       - href: labs.qmd
         text: Labs
       - href: assignments.qmd

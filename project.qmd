@@ -1,4 +1,6 @@
 ---
-title: "project"
+title: "Project"
 format: html
 ---
+
+[AI Documentation (PDF)](Gohl_AI_Documentation.pdf)

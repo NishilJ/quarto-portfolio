@@ -2,3 +2,215 @@
 title: "Assignment 1"
 format: html
 ---
+
+## 3. Exploratory Data Analysis with TEDS2016
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(haven)
+library(janitor)
+library(skimr)
+library(MASS)
+
+TEDS_2016 <- read_dta(
+  "https://github.com/datageneration/home/blob/master/DataProgramming/data/TEDS_2016.dta?raw=true"
+)
+```
+
+```{r}
+glimpse(TEDS_2016)
+skim(TEDS_2016)
+```
+
+The initial EDA inspects variable structure, data types, and missingness patterns before modeling.
+
+## 4. Problems encountered when working with the dataset
+
+```{r}
+# Check candidate variables used in this assignment
+vars_needed <- c(
+  "Tondu", "female", "DPP", "age", "income", "edu", "Taiwanese", "Econ_worse", "votetsai"
+)
+
+intersect(vars_needed, names(TEDS_2016))
+setdiff(vars_needed, names(TEDS_2016))
+```
+
+## 5. How to deal with missing values
+
+```{r}
+# Convert haven-labelled vectors to plain vectors first
+TEDS_clean <- TEDS_2016 |>
+  mutate(across(where(haven::is.labelled), haven::zap_labels))
+
+recode_missing_codes <- function(x) {
+  if (!is.numeric(x)) return(x)
+  x |>
+    na_if(7) |>
+    na_if(8) |>
+    na_if(9) |>
+    na_if(97) |>
+    na_if(98) |>
+    na_if(99)
+}
+
+TEDS_clean <- TEDS_clean |>
+  mutate(across(everything(), recode_missing_codes))
+```
+
+```{r}
+# Missing values in assignment variables
+TEDS_clean |>
+  summarise(across(all_of(intersect(vars_needed, names(TEDS_clean))), ~ sum(is.na(.)))) |>
+  pivot_longer(everything(), names_to = "variable", values_to = "n_missing") |>
+  arrange(desc(n_missing))
+```
+
+In this assignment, I handle missing values by putting known nonresponse codes to `NA`, then using `drop_na()` only on variables required by each specific model/table.
+
+## 6. Relationship between `Tondu` and other variables
+
+### Prepare analysis data and assign labels
+
+```{r}
+tondu_labels <- c(
+  "Unification now",
+  "Status quo, unif. in future",
+  "Status quo, decide later",
+  "Status quo forever",
+  "Status quo, indep. in future",
+  "Independence now",
+  "No response"
+)
+
+analysis_vars <- intersect(vars_needed, names(TEDS_clean))
+
+df <- TEDS_clean |>
+  mutate(
+    Tondu = as.numeric(Tondu),
+    Tondu = factor(Tondu, levels = 1:7, labels = tondu_labels, ordered = TRUE),
+    female = as.factor(female),
+    DPP = as.factor(DPP),
+    Taiwanese = as.factor(Taiwanese),
+    Econ_worse = as.factor(Econ_worse)
+  ) |>
+  select(all_of(analysis_vars))
+```
+
+### Frequency tables and descriptive checks
+
+```{r}
+# Tondu by key categorical predictors
+tabyl(df, Tondu)
+if ("female" %in% names(df)) tabyl(df, Tondu, female)
+if ("DPP" %in% names(df)) tabyl(df, Tondu, DPP)
+if ("Taiwanese" %in% names(df)) tabyl(df, Tondu, Taiwanese)
+if ("Econ_worse" %in% names(df)) tabyl(df, Tondu, Econ_worse)
+```
+
+```{r}
+# Example association test (if both variables exist)
+if (all(c("Tondu", "DPP") %in% names(df))) {
+  chisq.test(table(df$Tondu, df$DPP))
+}
+```
+
+### Visualization method
+
+```{r}
+ggplot(df, aes(x = Tondu)) +
+  geom_bar(fill = "steelblue") +
+  labs(
+    title = "Distribution of Tondu",
+    x = "Tondu",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+```
+
+```{r}
+# Stacked composition plot for DPP by Tondu (if available)
+if (all(c("Tondu", "DPP") %in% names(df))) {
+  ggplot(df, aes(x = Tondu, fill = DPP)) +
+    geom_bar(position = "fill") +
+    labs(
+      title = "DPP composition within each Tondu category",
+      x = "Tondu",
+      y = "Proportion"
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 25, hjust = 1))
+}
+```
+
+### Modeling method for `Tondu`
+
+Because `Tondu` is ordered, an ordinal logistic regression is appropriate.
+
+```{r}
+model_vars <- c("Tondu", "female", "DPP", "age", "income", "edu", "Taiwanese", "Econ_worse")
+model_vars <- intersect(model_vars, names(df))
+
+df_tondu <- df |> drop_na(all_of(model_vars))
+
+if (all(c("Tondu", "female", "DPP", "age", "income", "edu", "Taiwanese", "Econ_worse") %in% names(df_tondu))) {
+  m_tondu <- MASS::polr(
+    Tondu ~ female + DPP + age + income + edu + Taiwanese + Econ_worse,
+    data = df_tondu,
+    Hess = TRUE
+  )
+  summary(m_tondu)
+}
+```
+
+## 7. Next step: analyze `votetsai`
+
+A binary logistic regression is suitable if `votetsai` is a yes/no vote indicator.
+
+```{r}
+if ("votetsai" %in% names(df)) {
+  df_vote <- df |>
+    mutate(votetsai = as.factor(votetsai)) |>
+    drop_na(votetsai, Tondu)
+
+  # Crosstab first
+  tabyl(df_vote, votetsai, Tondu)
+
+  # Model (adds controls if available)
+  vote_predictors <- c("Tondu", "female", "DPP", "age", "income", "edu", "Taiwanese", "Econ_worse")
+  vote_predictors <- intersect(vote_predictors, names(df_vote))
+
+  form <- as.formula(paste("votetsai ~", paste(vote_predictors, collapse = " + ")))
+  m_vote <- glm(form, data = df_vote |> drop_na(all_of(c("votetsai", vote_predictors))), family = binomial())
+  summary(m_vote)
+}
+```
+
+## 8. Frequency table and barchart of `Tondu` with labels
+
+The provided sample line should use `factor()` for labels (not `as.numeric(..., labels = ...)`).
+
+```{r}
+TEDS_2016 <- TEDS_2016 |>
+  mutate(
+    Tondu = as.numeric(Tondu),
+    Tondu = factor(Tondu, levels = 1:7, labels = tondu_labels)
+  )
+```
+
+```{r}
+tabyl(TEDS_2016, Tondu)
+
+ggplot(TEDS_2016, aes(x = Tondu)) +
+  geom_bar(fill = "steelblue") +
+  labs(
+    title = "Tondu Frequency Bar Chart",
+    x = "Tondu",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+```

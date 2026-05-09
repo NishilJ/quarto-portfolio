@@ -12,7 +12,6 @@ library(tidyverse)
 library(haven)
 library(janitor)
 library(skimr)
-library(MASS)
 
 TEDS_2016 <- read_dta(
   "https://github.com/datageneration/home/blob/master/DataProgramming/data/TEDS_2016.dta?raw=true"

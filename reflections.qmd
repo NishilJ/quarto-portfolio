@@ -30,4 +30,3 @@ ChatGPT will be my general purpose model and I will use Windsurf and Github Copi
 This relates to the concept of originality. Humans find and create knowledge from our lived experiences and insights and contextualization. Knowledge is complex, holds deep context and exists only in our brains while information is data that can exist outside of us in for example written text.
 
 #### Put together a list of AI discrepancies/failures. Any pattern?
-

@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -131,8 +166,25 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#exploratory-data-analysis-with-teds2016" id="toc-exploratory-data-analysis-with-teds2016" class="nav-link active" data-scroll-target="#exploratory-data-analysis-with-teds2016">3. Exploratory Data Analysis with TEDS2016</a></li>
+  <li><a href="#problems-encountered-when-working-with-the-dataset" id="toc-problems-encountered-when-working-with-the-dataset" class="nav-link" data-scroll-target="#problems-encountered-when-working-with-the-dataset">4. Problems encountered when working with the dataset</a></li>
+  <li><a href="#how-to-deal-with-missing-values" id="toc-how-to-deal-with-missing-values" class="nav-link" data-scroll-target="#how-to-deal-with-missing-values">5. How to deal with missing values</a></li>
+  <li><a href="#relationship-between-tondu-and-other-variables" id="toc-relationship-between-tondu-and-other-variables" class="nav-link" data-scroll-target="#relationship-between-tondu-and-other-variables">6. Relationship between <code>Tondu</code> and other variables</a>
+  <ul class="collapse">
+  <li><a href="#prepare-analysis-data-and-assign-labels" id="toc-prepare-analysis-data-and-assign-labels" class="nav-link" data-scroll-target="#prepare-analysis-data-and-assign-labels">Prepare analysis data and assign labels</a></li>
+  <li><a href="#frequency-tables-and-descriptive-checks" id="toc-frequency-tables-and-descriptive-checks" class="nav-link" data-scroll-target="#frequency-tables-and-descriptive-checks">Frequency tables and descriptive checks</a></li>
+  <li><a href="#visualization-method" id="toc-visualization-method" class="nav-link" data-scroll-target="#visualization-method">Visualization method</a></li>
+  <li><a href="#modeling-method-for-tondu" id="toc-modeling-method-for-tondu" class="nav-link" data-scroll-target="#modeling-method-for-tondu">Modeling method for <code>Tondu</code></a></li>
+  </ul></li>
+  <li><a href="#next-step-analyze-votetsai" id="toc-next-step-analyze-votetsai" class="nav-link" data-scroll-target="#next-step-analyze-votetsai">7. Next step: analyze <code>votetsai</code></a></li>
+  <li><a href="#frequency-table-and-barchart-of-tondu-with-labels" id="toc-frequency-table-and-barchart-of-tondu-with-labels" class="nav-link" data-scroll-target="#frequency-table-and-barchart-of-tondu-with-labels">8. Frequency table and barchart of <code>Tondu</code> with labels</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -156,8 +208,1217 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="exploratory-data-analysis-with-teds2016" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis-with-teds2016">3. Exploratory Data Analysis with TEDS2016</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(skimr)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>TEDS_2016 <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://github.com/datageneration/home/blob/master/DataProgramming/data/TEDS_2016.dta?raw=true"</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(TEDS_2016)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 1,690
+Columns: 54
+$ District        &lt;dbl+lbl&gt; 201, 201, 201, 201, 201, 201, 201, 201, 201, 201, …
+$ Sex             &lt;dbl+lbl&gt; 2, 2, 1, 1, 2, 2, 1, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2,…
+$ Age             &lt;dbl+lbl&gt; 4, 2, 5, 4, 5, 5, 5, 4, 5, 4, 5, 1, 5, 3, 4, 5, 4,…
+$ Edu             &lt;dbl+lbl&gt; 4, 5, 5, 2, 1, 2, 1, 5, 1, 1, 1, 2, 1, 5, 5, 1, 3,…
+$ Arear           &lt;dbl+lbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+$ Career          &lt;dbl+lbl&gt; 1, 2, 1, 4, 3, 2, 4, 1, 4, 3, 3, 5, 5, 4, 1, 5, 2,…
+$ Career8         &lt;dbl+lbl&gt; 1, 3, 1, 4, 5, 7, 4, 2, 4, 5, 5, 7, 7, 7, 2, 7, 3,…
+$ Ethnic          &lt;dbl+lbl&gt; 1, 2, 2, 1, 9, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 9, 2,…
+$ Party           &lt;dbl+lbl&gt; 25, 25,  3, 25, 25,  6, 25, 24, 25, 25,  6,  5, 25…
+$ PartyID         &lt;dbl+lbl&gt; 9, 9, 1, 9, 9, 2, 9, 6, 9, 9, 2, 2, 9, 1, 1, 9, 9,…
+$ Tondu           &lt;dbl+lbl&gt; 3, 5, 3, 5, 9, 4, 9, 6, 9, 9, 5, 5, 9, 5, 4, 9, 9,…
+$ Tondu3          &lt;dbl+lbl&gt; 2, 3, 2, 3, 9, 2, 9, 3, 9, 9, 3, 3, 9, 3, 2, 9, 9,…
+$ nI2             &lt;dbl+lbl&gt;  3, 98, 98,  3, 98, 98, 98,  3, 98,  1,  2, 98, 98…
+$ votetsai        &lt;dbl&gt; NA, 1, 0, NA, NA, 1, 1, 1, 1, NA, 1, 1, NA, 0, 0, 1, N…
+$ green           &lt;dbl&gt; 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, …
+$ votetsai_nm     &lt;dbl&gt; NA, 1, 0, NA, NA, 1, 1, 1, 1, NA, 1, 1, NA, 0, 0, 1, N…
+$ votetsai_all    &lt;dbl&gt; 0, 1, 0, 0, 0, 1, 1, 1, 1, NA, 1, 1, 0, 0, 0, 1, 0, 0,…
+$ Independence    &lt;dbl&gt; 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, …
+$ Unification     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ sq              &lt;dbl&gt; 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, …
+$ Taiwanese       &lt;dbl&gt; 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, …
+$ edu             &lt;dbl&gt; 4, 5, 5, 2, 1, 2, 1, 5, 1, 1, 1, 2, 1, 5, 5, 1, 3, 4, …
+$ female          &lt;dbl&gt; 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, …
+$ whitecollar     &lt;dbl&gt; 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, …
+$ lowincome       &lt;dbl&gt; 4, 4, 5, 4, 3, 5, 2, 5, 5, 5, 2, 5, 3, 3, 4, 4, 5, 4, …
+$ income          &lt;dbl&gt; 8.0, 7.0, 8.0, 5.0, 5.5, 9.0, 1.0, 10.0, 2.0, 5.5, 3.0…
+$ income_nm       &lt;dbl&gt; 8, 7, 8, 5, NA, 9, 1, 10, 2, NA, 3, NA, NA, 9, 1, NA, …
+$ age             &lt;dbl&gt; 59, 39, 63, 55, 76, 64, 75, 54, 64, 59, 66, 25, 92, 41…
+$ KMT             &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, …
+$ DPP             &lt;dbl&gt; 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, …
+$ npp             &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ noparty         &lt;dbl&gt; 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, …
+$ pfp             &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ South           &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ north           &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+$ Minnan_father   &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, …
+$ Mainland_father &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, …
+$ Econ_worse      &lt;dbl&gt; 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, …
+$ Inequality      &lt;dbl&gt; 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, …
+$ inequality5     &lt;dbl&gt; 4, 5, 5, 5, 3, 5, 3, 5, 5, 5, 5, 5, 3, 4, 3, 5, 5, 5, …
+$ econworse5      &lt;dbl&gt; 3, 3, 4, 5, 3, 4, 4, 5, 5, 5, 5, 3, 3, 3, 4, 3, 4, 3, …
+$ Govt_for_public &lt;dbl&gt; 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, …
+$ pubwelf5        &lt;dbl&gt; 5, 5, 4, 1, 3, 2, 2, 1, 3, 2, 1, 2, 3, 4, 2, 5, 2, 2, …
+$ Govt_dont_care  &lt;dbl&gt; 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, …
+$ highincome      &lt;dbl&gt; 1, 1, 1, 1, NA, 1, 0, 1, 0, NA, 0, NA, NA, 1, 0, NA, N…
+$ votekmt         &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, …
+$ votekmt_nm      &lt;dbl&gt; NA, 0, 1, NA, NA, 0, 0, 0, 0, NA, 0, 0, NA, 0, 1, 0, N…
+$ Blue            &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ Green           &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ No_Party        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ voteblue        &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, …
+$ voteblue_nm     &lt;dbl&gt; NA, 0, 1, NA, NA, 0, 0, 0, 0, NA, 0, 0, NA, 1, 1, 0, N…
+$ votedpp_1       &lt;dbl&gt; NA, 1, 0, NA, NA, 1, 1, 1, 1, 0, 1, 1, NA, 0, 0, 1, NA…
+$ votekmt_1       &lt;dbl&gt; NA, 0, 1, NA, NA, 0, 0, 0, 0, 0, 0, 0, NA, 0, 1, 0, NA…</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(TEDS_2016)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">TEDS_2016</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">1690</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">54</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">numeric</td>
+<td style="text-align: left;">54</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 11%">
+<col style="width: 15%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 4%">
+<col style="width: 5%">
+<col style="width: 7%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">p0</th>
+<th style="text-align: right;">p25</th>
+<th style="text-align: right;">p50</th>
+<th style="text-align: right;">p75</th>
+<th style="text-align: right;">p100</th>
+<th style="text-align: left;">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">District</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">4660.58</td>
+<td style="text-align: right;">2652.46</td>
+<td style="text-align: right;">201</td>
+<td style="text-align: right;">1401</td>
+<td style="text-align: right;">6406.0</td>
+<td style="text-align: right;">6604</td>
+<td style="text-align: right;">6806</td>
+<td style="text-align: left;">▃▁▁▁▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sex</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.49</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">▇▁▁▁▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Age</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">3.30</td>
+<td style="text-align: right;">1.44</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3.0</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">▅▅▅▆▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Edu</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">3.33</td>
+<td style="text-align: right;">1.55</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3.0</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: left;">▆▇▇▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Arear</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.74</td>
+<td style="text-align: right;">1.56</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3.0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">▇▃▃▂▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Career</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.68</td>
+<td style="text-align: right;">1.43</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">▇▆▂▇▃</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Career8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">3.81</td>
+<td style="text-align: right;">1.98</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">4.0</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: left;">▇▅▇▁▅</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ethnic</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.66</td>
+<td style="text-align: right;">1.50</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Party</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">13.02</td>
+<td style="text-align: right;">9.93</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">7.0</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: left;">▇▂▁▁▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PartyID</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">4.52</td>
+<td style="text-align: right;">3.55</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: left;">▇▁▁▁▅</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Tondu</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">4.13</td>
+<td style="text-align: right;">1.77</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4.0</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: left;">▂▇▃▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Tondu3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.67</td>
+<td style="text-align: right;">1.86</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: left;">▇▃▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">nI2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">35.13</td>
+<td style="text-align: right;">45.76</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3.0</td>
+<td style="text-align: right;">98</td>
+<td style="text-align: right;">98</td>
+<td style="text-align: left;">▇▁▁▁▅</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">votetsai</td>
+<td style="text-align: right;">429</td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▅▁▁▁▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">green</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.38</td>
+<td style="text-align: right;">0.49</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▅</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">votetsai_nm</td>
+<td style="text-align: right;">429</td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▅▁▁▁▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">votetsai_all</td>
+<td style="text-align: right;">248</td>
+<td style="text-align: right;">0.85</td>
+<td style="text-align: right;">0.55</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▆▁▁▁▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Independence</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.29</td>
+<td style="text-align: right;">0.45</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▃</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Unification</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.12</td>
+<td style="text-align: right;">0.33</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sq</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.52</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Taiwanese</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▅▁▁▁▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">edu</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">3.30</td>
+<td style="text-align: right;">1.49</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3.0</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">▅▂▆▂▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.49</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">whitecollar</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.54</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">lowincome</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">4.34</td>
+<td style="text-align: right;">0.82</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">5.0</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">▁▁▁▆▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">income</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">5.32</td>
+<td style="text-align: right;">2.74</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5.5</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: left;">▅▃▇▃▃</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">income_nm</td>
+<td style="text-align: right;">330</td>
+<td style="text-align: right;">0.80</td>
+<td style="text-align: right;">5.28</td>
+<td style="text-align: right;">3.05</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">5.0</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: left;">▇▅▆▆▆</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">age</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">49.11</td>
+<td style="text-align: right;">16.81</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">49.0</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: left;">▇▇▇▃▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">KMT</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">0.42</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▂</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">DPP</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▅</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">npp</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.16</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">noparty</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.37</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▅</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">pfp</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">South</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.49</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">north</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Minnan_father</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.72</td>
+<td style="text-align: right;">0.45</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▃▁▁▁▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Mainland_father</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Econ_worse</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.55</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▆▁▁▁▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Inequality</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.94</td>
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▁▁▁▁▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">inequality5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">4.49</td>
+<td style="text-align: right;">0.73</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">5.0</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">▁▁▁▅▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">econworse5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">3.64</td>
+<td style="text-align: right;">0.78</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4.0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">▁▁▇▇▂</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Govt_for_public</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.42</td>
+<td style="text-align: right;">0.49</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▆</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">pubwelf5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.88</td>
+<td style="text-align: right;">1.17</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3.0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">▂▇▂▇▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Govt_dont_care</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">highincome</td>
+<td style="text-align: right;">330</td>
+<td style="text-align: right;">0.80</td>
+<td style="text-align: right;">0.58</td>
+<td style="text-align: right;">0.49</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▆▁▁▁▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">votekmt</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.21</td>
+<td style="text-align: right;">0.40</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▂</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">votekmt_nm</td>
+<td style="text-align: right;">429</td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">0.28</td>
+<td style="text-align: right;">0.45</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▃</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">▁▁▇▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">▁▁▇▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">No_Party</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">▁▁▇▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">voteblue</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.28</td>
+<td style="text-align: right;">0.45</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▃</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">voteblue_nm</td>
+<td style="text-align: right;">429</td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">0.37</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▅</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">votedpp_1</td>
+<td style="text-align: right;">187</td>
+<td style="text-align: right;">0.89</td>
+<td style="text-align: right;">0.53</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">votekmt_1</td>
+<td style="text-align: right;">187</td>
+<td style="text-align: right;">0.89</td>
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">0.42</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">▇▁▁▁▂</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The initial EDA inspects variable structure, data types, and missingness patterns before modeling.</p>
+</section>
+<section id="problems-encountered-when-working-with-the-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="problems-encountered-when-working-with-the-dataset">4. Problems encountered when working with the dataset</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check candidate variables used in this assignment</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>vars_needed <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Tondu"</span>, <span class="st">"female"</span>, <span class="st">"DPP"</span>, <span class="st">"age"</span>, <span class="st">"income"</span>, <span class="st">"edu"</span>, <span class="st">"Taiwanese"</span>, <span class="st">"Econ_worse"</span>, <span class="st">"votetsai"</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">intersect</span>(vars_needed, <span class="fu">names</span>(TEDS_2016))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Tondu"      "female"     "DPP"        "age"        "income"    
+[6] "edu"        "Taiwanese"  "Econ_worse" "votetsai"  </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(vars_needed, <span class="fu">names</span>(TEDS_2016))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>character(0)</code></pre>
+</div>
+</div>
+</section>
+<section id="how-to-deal-with-missing-values" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-deal-with-missing-values">5. How to deal with missing values</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert haven-labelled vectors to plain vectors first</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>TEDS_clean <span class="ot">&lt;-</span> TEDS_2016 <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(haven<span class="sc">::</span>is.labelled), haven<span class="sc">::</span>zap_labels))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>recode_missing_codes <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.numeric</span>(x)) <span class="fu">return</span>(x)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  x <span class="sc">|&gt;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">na_if</span>(<span class="dv">7</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">na_if</span>(<span class="dv">8</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">na_if</span>(<span class="dv">9</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">na_if</span>(<span class="dv">97</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">na_if</span>(<span class="dv">98</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">na_if</span>(<span class="dv">99</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>TEDS_clean <span class="ot">&lt;-</span> TEDS_clean <span class="sc">|&gt;</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), recode_missing_codes))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Missing values in assignment variables</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>TEDS_clean <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">all_of</span>(<span class="fu">intersect</span>(vars_needed, <span class="fu">names</span>(TEDS_clean))), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.)))) <span class="sc">|&gt;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"n_missing"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n_missing))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 9 × 2
+  variable   n_missing
+  &lt;chr&gt;          &lt;int&gt;
+1 votetsai         429
+2 income           362
+3 Tondu            121
+4 edu               10
+5 female             0
+6 DPP                0
+7 age                0
+8 Taiwanese          0
+9 Econ_worse         0</code></pre>
+</div>
+</div>
+<p>In this assignment, I handle missing values by putting known nonresponse codes to <code>NA</code>, then using <code>drop_na()</code> only on variables required by each specific model/table.</p>
+</section>
+<section id="relationship-between-tondu-and-other-variables" class="level2">
+<h2 class="anchored" data-anchor-id="relationship-between-tondu-and-other-variables">6. Relationship between <code>Tondu</code> and other variables</h2>
+<section id="prepare-analysis-data-and-assign-labels" class="level3">
+<h3 class="anchored" data-anchor-id="prepare-analysis-data-and-assign-labels">Prepare analysis data and assign labels</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>tondu_labels <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Unification now"</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Status quo, unif. in future"</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Status quo, decide later"</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Status quo forever"</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Status quo, indep. in future"</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Independence now"</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"No response"</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>analysis_vars <span class="ot">&lt;-</span> <span class="fu">intersect</span>(vars_needed, <span class="fu">names</span>(TEDS_clean))</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> TEDS_clean <span class="sc">|&gt;</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">Tondu =</span> <span class="fu">as.numeric</span>(Tondu),</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">Tondu =</span> <span class="fu">factor</span>(Tondu, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>, <span class="at">labels =</span> tondu_labels, <span class="at">ordered =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">female =</span> <span class="fu">as.factor</span>(female),</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">DPP =</span> <span class="fu">as.factor</span>(DPP),</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">Taiwanese =</span> <span class="fu">as.factor</span>(Taiwanese),</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">Econ_worse =</span> <span class="fu">as.factor</span>(Econ_worse)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">all_of</span>(analysis_vars))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="frequency-tables-and-descriptive-checks" class="level3">
+<h3 class="anchored" data-anchor-id="frequency-tables-and-descriptive-checks">Frequency tables and descriptive checks</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tondu by key categorical predictors</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tabyl</span>(df, Tondu)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                        Tondu   n    percent valid_percent
+              Unification now  27 0.01597633    0.01720841
+  Status quo, unif. in future 180 0.10650888    0.11472275
+     Status quo, decide later 546 0.32307692    0.34799235
+           Status quo forever 328 0.19408284    0.20905035
+ Status quo, indep. in future 380 0.22485207    0.24219248
+             Independence now 108 0.06390533    0.06883365
+                  No response   0 0.00000000    0.00000000
+                         &lt;NA&gt; 121 0.07159763            NA</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="st">"female"</span> <span class="sc">%in%</span> <span class="fu">names</span>(df)) <span class="fu">tabyl</span>(df, Tondu, female)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                        Tondu   0   1
+              Unification now  13  14
+  Status quo, unif. in future 118  62
+     Status quo, decide later 295 251
+           Status quo forever 151 177
+ Status quo, indep. in future 206 174
+             Independence now  54  54
+                  No response   0   0
+                         &lt;NA&gt;  31  90</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="st">"DPP"</span> <span class="sc">%in%</span> <span class="fu">names</span>(df)) <span class="fu">tabyl</span>(df, Tondu, DPP)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                        Tondu   0   1
+              Unification now  26   1
+  Status quo, unif. in future 147  33
+     Status quo, decide later 378 168
+           Status quo forever 256  72
+ Status quo, indep. in future 144 236
+             Independence now  38  70
+                  No response   0   0
+                         &lt;NA&gt; 110  11</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="st">"Taiwanese"</span> <span class="sc">%in%</span> <span class="fu">names</span>(df)) <span class="fu">tabyl</span>(df, Tondu, Taiwanese)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                        Tondu   0   1
+              Unification now  16  11
+  Status quo, unif. in future 132  48
+     Status quo, decide later 244 302
+           Status quo forever 136 192
+ Status quo, indep. in future  49 331
+             Independence now   4 104
+                  No response   0   0
+                         &lt;NA&gt;  49  72</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="st">"Econ_worse"</span> <span class="sc">%in%</span> <span class="fu">names</span>(df)) <span class="fu">tabyl</span>(df, Tondu, Econ_worse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                        Tondu   0   1
+              Unification now  14  13
+  Status quo, unif. in future  78 102
+     Status quo, decide later 239 307
+           Status quo forever 157 171
+ Status quo, indep. in future 155 225
+             Independence now  39  69
+                  No response   0   0
+                         &lt;NA&gt;  71  50</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Example association test (if both variables exist)</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">all</span>(<span class="fu">c</span>(<span class="st">"Tondu"</span>, <span class="st">"DPP"</span>) <span class="sc">%in%</span> <span class="fu">names</span>(df))) {</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">chisq.test</span>(<span class="fu">table</span>(df<span class="sc">$</span>Tondu, df<span class="sc">$</span>DPP))</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in stats::chisq.test(x, y, ...): Chi-squared approximation may be
+incorrect</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's Chi-squared test
+
+data:  table(df$Tondu, df$DPP)
+X-squared = NaN, df = 6, p-value = NA</code></pre>
+</div>
+</div>
+</section>
+<section id="visualization-method" class="level3">
+<h3 class="anchored" data-anchor-id="visualization-method">Visualization method</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Tondu)) <span class="sc">+</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">fill =</span> <span class="st">"steelblue"</span>) <span class="sc">+</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Distribution of Tondu"</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Tondu"</span>,</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Count"</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">25</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="as01_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Stacked composition plot for DPP by Tondu (if available)</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">all</span>(<span class="fu">c</span>(<span class="st">"Tondu"</span>, <span class="st">"DPP"</span>) <span class="sc">%in%</span> <span class="fu">names</span>(df))) {</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Tondu, <span class="at">fill =</span> DPP)) <span class="sc">+</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"fill"</span>) <span class="sc">+</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="st">"DPP composition within each Tondu category"</span>,</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> <span class="st">"Tondu"</span>,</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="st">"Proportion"</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">25</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="as01_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="modeling-method-for-tondu" class="level3">
+<h3 class="anchored" data-anchor-id="modeling-method-for-tondu">Modeling method for <code>Tondu</code></h3>
+<p>Because <code>Tondu</code> is ordered, an ordinal logistic regression is appropriate.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>model_vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Tondu"</span>, <span class="st">"female"</span>, <span class="st">"DPP"</span>, <span class="st">"age"</span>, <span class="st">"income"</span>, <span class="st">"edu"</span>, <span class="st">"Taiwanese"</span>, <span class="st">"Econ_worse"</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>model_vars <span class="ot">&lt;-</span> <span class="fu">intersect</span>(model_vars, <span class="fu">names</span>(df))</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>df_tondu <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span> <span class="fu">drop_na</span>(<span class="fu">all_of</span>(model_vars))</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">all</span>(<span class="fu">c</span>(<span class="st">"Tondu"</span>, <span class="st">"female"</span>, <span class="st">"DPP"</span>, <span class="st">"age"</span>, <span class="st">"income"</span>, <span class="st">"edu"</span>, <span class="st">"Taiwanese"</span>, <span class="st">"Econ_worse"</span>) <span class="sc">%in%</span> <span class="fu">names</span>(df_tondu))) {</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  m_tondu <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">polr</span>(</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    Tondu <span class="sc">~</span> female <span class="sc">+</span> DPP <span class="sc">+</span> age <span class="sc">+</span> income <span class="sc">+</span> edu <span class="sc">+</span> Taiwanese <span class="sc">+</span> Econ_worse,</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> df_tondu,</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">Hess =</span> <span class="cn">TRUE</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(m_tondu)</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+MASS::polr(formula = Tondu ~ female + DPP + age + income + edu + 
+    Taiwanese + Econ_worse, data = df_tondu, Hess = TRUE)
+
+Coefficients:
+                Value Std. Error t value
+female1      0.141315   0.106364  1.3286
+DPP1         0.973945   0.120514  8.0816
+age         -0.014693   0.004047 -3.6304
+income      -0.007236   0.020777 -0.3483
+edu         -0.014031   0.047396 -0.2960
+Taiwanese1   1.249634   0.123017 10.1582
+Econ_worse1 -0.162744   0.109111 -1.4916
+
+Intercepts:
+                                                     Value   Std. Error t value
+Unification now|Status quo, unif. in future          -4.0587  0.4101    -9.8979
+Status quo, unif. in future|Status quo, decide later -1.8391  0.3565    -5.1592
+Status quo, decide later|Status quo forever           0.1834  0.3513     0.5222
+Status quo forever|Status quo, indep. in future       1.2605  0.3546     3.5549
+Status quo, indep. in future|Independence now         3.1332  0.3672     8.5323
+Independence now|No response                         18.9476  0.3672    51.5975
+
+Residual Deviance: 3470.646 
+AIC: 3496.646 </code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="next-step-analyze-votetsai" class="level2">
+<h2 class="anchored" data-anchor-id="next-step-analyze-votetsai">7. Next step: analyze <code>votetsai</code></h2>
+<p>A binary logistic regression is suitable if <code>votetsai</code> is a yes/no vote indicator.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="st">"votetsai"</span> <span class="sc">%in%</span> <span class="fu">names</span>(df)) {</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  df_vote <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">votetsai =</span> <span class="fu">as.factor</span>(votetsai)) <span class="sc">|&gt;</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">drop_na</span>(votetsai, Tondu)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Crosstab first</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tabyl</span>(df_vote, votetsai, Tondu)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Model (adds controls if available)</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  vote_predictors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Tondu"</span>, <span class="st">"female"</span>, <span class="st">"DPP"</span>, <span class="st">"age"</span>, <span class="st">"income"</span>, <span class="st">"edu"</span>, <span class="st">"Taiwanese"</span>, <span class="st">"Econ_worse"</span>)</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  vote_predictors <span class="ot">&lt;-</span> <span class="fu">intersect</span>(vote_predictors, <span class="fu">names</span>(df_vote))</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>  form <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">"votetsai ~"</span>, <span class="fu">paste</span>(vote_predictors, <span class="at">collapse =</span> <span class="st">" + "</span>)))</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>  m_vote <span class="ot">&lt;-</span> <span class="fu">glm</span>(form, <span class="at">data =</span> df_vote <span class="sc">|&gt;</span> <span class="fu">drop_na</span>(<span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"votetsai"</span>, vote_predictors))), <span class="at">family =</span> <span class="fu">binomial</span>())</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(m_vote)</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = form, family = binomial(), data = drop_na(df_vote, 
+    all_of(c("votetsai", vote_predictors))))
+
+Coefficients:
+             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept) -0.233595   0.686886  -0.340  0.73380    
+Tondu.L      0.921283   0.475061   1.939  0.05247 .  
+Tondu.Q      0.452534   0.419366   1.079  0.28055    
+Tondu.C     -0.564464   0.344701  -1.638  0.10152    
+Tondu^4     -0.355267   0.270651  -1.313  0.18931    
+Tondu^5     -0.695935   0.209215  -3.326  0.00088 ***
+female1     -0.436828   0.200455  -2.179  0.02932 *  
+DPP1         3.439187   0.308231  11.158  &lt; 2e-16 ***
+age         -0.006278   0.008086  -0.776  0.43746    
+income      -0.034563   0.038810  -0.891  0.37316    
+edu         -0.155170   0.093620  -1.657  0.09743 .  
+Taiwanese1   1.292315   0.212408   6.084 1.17e-09 ***
+Econ_worse1  0.409663   0.200149   2.047  0.04068 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1203.99  on 904  degrees of freedom
+Residual deviance:  666.43  on 892  degrees of freedom
+AIC: 692.43
+
+Number of Fisher Scoring iterations: 6</code></pre>
+</div>
+</div>
+</section>
+<section id="frequency-table-and-barchart-of-tondu-with-labels" class="level2">
+<h2 class="anchored" data-anchor-id="frequency-table-and-barchart-of-tondu-with-labels">8. Frequency table and barchart of <code>Tondu</code> with labels</h2>
+<p>The provided sample line should use <code>factor()</code> for labels (not <code>as.numeric(..., labels = ...)</code>).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>TEDS_2016 <span class="ot">&lt;-</span> TEDS_2016 <span class="sc">|&gt;</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">Tondu =</span> <span class="fu">as.numeric</span>(Tondu),</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">Tondu =</span> <span class="fu">factor</span>(Tondu, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>, <span class="at">labels =</span> tondu_labels)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tabyl</span>(TEDS_2016, Tondu)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                        Tondu   n    percent valid_percent
+              Unification now  27 0.01597633    0.01720841
+  Status quo, unif. in future 180 0.10650888    0.11472275
+     Status quo, decide later 546 0.32307692    0.34799235
+           Status quo forever 328 0.19408284    0.20905035
+ Status quo, indep. in future 380 0.22485207    0.24219248
+             Independence now 108 0.06390533    0.06883365
+                  No response   0 0.00000000    0.00000000
+                         &lt;NA&gt; 121 0.07159763            NA</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(TEDS_2016, <span class="fu">aes</span>(<span class="at">x =</span> Tondu)) <span class="sc">+</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">fill =</span> <span class="st">"steelblue"</span>) <span class="sc">+</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Tondu Frequency Bar Chart"</span>,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Tondu"</span>,</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Count"</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">25</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="as01_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

@@ -30,3 +30,23 @@ ChatGPT will be my general purpose model and I will use Windsurf and Github Copi
 This relates to the concept of originality. Humans find and create knowledge from our lived experiences and insights and contextualization. Knowledge is complex, holds deep context and exists only in our brains while information is data that can exist outside of us in for example written text.
 
 #### Put together a list of AI discrepancies/failures. Any pattern?
+
+## Week 6 (2/24/26)
+
+#### Start your first ML pipeline. What did the error analysis reveal that the accuracy score alone did not? How does overfitting relate to knowledge vs. noise
+
+A error analysis is looking at what the model was getting wrong rather than just looking at the general accuracy score. Accuracy can make the model seem good overall, but the errors show where it is confused and what patterns it is consistently not understanding. Overfitting relates to knowledge vs noise because when a model overfits it is not really learning the deeper pattern. It is learning random details or quirks in the training data. Knowledge is what defines the generalization while noise is the part that only seems useful because it was in the training set.
+
+## Week 7 (3/3/26)
+
+#### Prediction vs. explanation: when does it matter why something happens, and when is it enough to know what will happen? Give a policy or research example.
+
+Prediction matters when we mainly care about what will happen next. For example, predicting which students might fail a class is useful because then teachers can intervene earlier. Explanation matters when we need to know why something is happening. If a school wants to make a real policy change, it needs to know if the issue is attendance, resources, prior knowledge, etc. Prediction tells us where the problem is while explanation tells us what to change.
+
+#### Draw a simple causal diagram for a relationship in your research area. What confounders exist? How would you distinguish a causal claim from a predictive association?
+
+In my research area of GISC, a simple relationship could be green space and urban heat.
+
+green space -\> urban heat
+
+Some confounders could be income, population density, building density, and distance from downtown. These could affect both how much green space an area has and how hot it gets. A predictive association would just say areas with less green space are also hotter. A causal claim would say that less green space causes higher urban heat. To distinguish them, we would need to control for those outside factors or compare similar areas where the main difference is green space.

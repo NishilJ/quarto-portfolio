@@ -1,0 +1,49 @@
+---
+title: "Workshop: Scraping Google News RSS (newsscraping02.R)"
+format: html
+---
+
+## Workshop: Scraping Google News RSS (`newsscraping02.R`)
+
+```{r}
+#| label: newsscraping02
+source(
+  file.path("newsscraping02.R"),
+  encoding = "UTF-8",
+  print.eval = TRUE,
+  local = knitr::knit_global()
+)
+```
+
+### Iran war (single query)
+
+```{r}
+#| label: tbl-iranwar
+#| echo: false
+knitr::kable(
+  iranwar_2026,
+  caption = "Google News RSS: query \"Iran war\" (2026-02-28 to 2026-03-23)"
+)
+```
+
+### Keyword searches (Trump, Israel, Iran, Tehran)
+
+```{r}
+#| label: tbl-iw-news
+#| echo: false
+knitr::kable(
+  iw_news,
+  caption = "Combined rows from keyword searches (before deduplication)"
+)
+```
+
+### Deduplicated by title
+
+```{r}
+#| label: tbl-iw-news-dedup
+#| echo: false
+knitr::kable(
+  iw_news1,
+  caption = paste0("After `distinct()` by `item_title`: ", nrow(iw_news1), " rows")
+)
+```

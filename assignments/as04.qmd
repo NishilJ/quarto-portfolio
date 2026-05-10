@@ -126,19 +126,8 @@ textplot_keyness(tstat_party, n = 15, margin = 0.15, color = c("#2171b5", "#cb18
 
 ```{r}
 #| label: source-wordfish-workshop
-
-wf_script <- if (file.exists("wordfish02.R")) {
-  "wordfish02.R"
-} else {
-  file.path("assignments", "wordfish02.R")
-}
-if (!file.exists(wf_script)) {
-  stop("Cannot find wordfish02.R; expected next to as04.qmd or under assignments/.")
-}
-# Quarto/knitr render is non-interactive: source() defaults print.eval to FALSE
-# (via options(verbose)), so ggplot objects are never printed and no figures appear.
 source(
-  wf_script,
+  "wordfish02.R",
   encoding = "UTF-8",
   print.eval = TRUE,
   local = knitr::knit_global()

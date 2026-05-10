@@ -1,0 +1,95 @@
+---
+title: "Assignment 3: ML exercise"
+format: html
+execute:
+  warning: false
+  message: false
+---
+
+## Load the lab and data
+
+The lab script for this assignment is `Lab_ML01.R`. It loads the TEDS 2016 data and walks through exploratory analysis, clustering, and supervised learning models.
+
+```{r}
+# Run the full lab script.
+lab_file <- if (file.exists("Lab_ML01.R")) {
+  "Lab_ML01.R"
+} else {
+  "assignments/Lab_ML01.R"
+}
+
+source(lab_file)
+```
+
+For this assignment, I load the TEDS 2016 data directly using the code from the prompt.
+
+```{r}
+library(haven)
+
+TEDS_2016 <-
+  read_stata("https://github.com/datageneration/home/blob/master/DataProgramming/data/TEDS_2016.dta?raw=true")
+```
+
+## Multiple Regression Model
+
+The dependent variable is `votetsai`, which records whether the respondent voted for Tsai Ing-wen or another candidate. The independent variables are age, education, and income.
+
+```{r}
+model_lm <- lm(votetsai ~ age + edu + income, data = TEDS_2016)
+summary(model_lm)
+```
+
+## Creating a Function: `regplot`
+
+This function combines `lm()`, `plot()`, and `abline()` to create a regression fit plot.
+
+```{r}
+regplot <- function(x, y) {
+  fit <- lm(y ~ x)
+  plot(x, y)
+  abline(fit, col = "red")
+}
+```
+
+## Regression Plots
+
+### Age
+
+```{r}
+regplot(TEDS_2016$age, TEDS_2016$votetsai)
+```
+
+### Education
+
+```{r}
+regplot(TEDS_2016$edu, TEDS_2016$votetsai)
+```
+
+### Income
+
+```{r}
+regplot(TEDS_2016$income, TEDS_2016$votetsai)
+```
+
+## What Is the Problem?
+
+```{r}
+table(TEDS_2016$votetsai, useNA = "ifany")
+```
+
+The problem is that `votetsai` is a categorical dependent variable with only two categories, usually coded as `0` and `1`. A regular linear regression model assumes that the dependent variable is continuous, but vote choice is binary.
+
+## How Can Prediction Be Improved?
+
+Prediction can be improved by using a model designed for a categorical dependent variable. For a two-category outcome like `votetsai`, logistic regression is more appropriate than linear regression because it predicts probabilities between 0 and 1.
+
+```{r}
+model_logit <- glm(
+  votetsai ~ age + edu + income,
+  data = TEDS_2016,
+  family = binomial
+)
+
+summary(model_logit)
+```
+

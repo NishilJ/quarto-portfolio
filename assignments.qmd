@@ -9,4 +9,5 @@ Welcome to my assignments page! Here you can find all the assignments I’ve com
 -   [Assignment 1: Brush up R and Quarto](assignments/as01.qmd)
 -   [Assignment 2: Prompt exercise]()
 -   [Assignment 3: ML exercise](assignments/as03.qmd)
+-   [Assignment 4: Text Analytics using quanteda](assignments/as04.qmd)
 

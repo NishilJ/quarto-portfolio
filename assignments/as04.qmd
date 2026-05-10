@@ -1,0 +1,146 @@
+---
+title: "Assignment 4: Text analytics with quanteda"
+format: html
+execute:
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup-packages
+
+library(quanteda)
+library(quanteda.textstats)
+library(quanteda.textplots)
+library(quanteda.textmodels)
+library(ggplot2)
+library(tidyverse)
+```
+
+## US presidential inaugural speeches
+
+The `data_corpus_inaugural` object is included with current **quanteda** lib. Older setups used the add-on **quanteda.corpora**; the code below loads whichever is available. After preprocessing, documents are compared with cosine similarity on grouped DFMs and with keyness across historical periods.
+
+```{r}
+#| label: inaugural-corpus
+
+corp_inaug <- tryCatch(
+  quanteda::data_corpus_inaugural,
+  error = function(e) {
+    if (!requireNamespace("quanteda.corpora", quietly = TRUE)) {
+      stop(
+        "Could not load data_corpus_inaugural from quanteda. ",
+        "Run install.packages(\"quanteda\") to upgrade, or install.packages(\"quanteda.corpora\").",
+        call. = FALSE
+      )
+    }
+    quanteda.corpora::data_corpus_inaugural
+  }
+)
+toks_inaug <- tokens(corp_inaug, remove_punct = TRUE, remove_numbers = TRUE) |>
+  tokens_remove(stopwords("english"))
+dfmat_inaug <- dfm(toks_inaug)
+
+# One aggregated document per president → similarity between presidencies
+dfm_pres <- dfm_group(dfmat_inaug, groups = President)
+sim_pres <- textstat_simil(dfm_pres, method = "cosine")
+as.matrix(sim_pres)[1:6, 1:6]
+```
+
+```{r}
+#| label: inaugural-simil-plot
+
+# Cosine similarity as a heatmap-style view (all presidents in grouped DFM)
+sim_mat <- as.matrix(sim_pres)
+diag(sim_mat) <- NA
+ord <- hclust(as.dist(1 - sim_mat), method = "average")$order
+sim_ord <- sim_mat[ord, ord]
+sim_long <- sim_ord |>
+  as.data.frame() |>
+  tibble::rownames_to_column("President_A") |>
+  pivot_longer(-President_A, names_to = "President_B", values_to = "cosine") |>
+  filter(!is.na(cosine))
+sim_long$President_A <- factor(sim_long$President_A, levels = rownames(sim_ord))
+sim_long$President_B <- factor(sim_long$President_B, levels = colnames(sim_ord))
+
+ggplot(sim_long, aes(x = President_A, y = President_B, fill = cosine)) +
+  geom_tile(color = "white") +
+  scale_fill_viridis_c(option = "C", na.value = "grey90") +
+  labs(
+    title = "Cosine similarity between inaugural corpora (by president)",
+    subtitle = "Each cell pools all inaugural speeches for that president; diagonal omitted.",
+    x = NULL, y = NULL, fill = "Cosine"
+  ) +
+  theme_bw(base_size = 11) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Similarity highlights which presidents reuse overlapping vocabulary when pooled across all their inaugurals (length and era affect the measure). Differences overtime can be summmarized by contrasting early versus recent periods.
+
+```{r}
+#| label: inaugural-keyness-era
+
+year_doc <- docvars(corp_inaug, "Year")
+early <- year_doc < 1900
+recent <- year_doc >= 2001
+tstat_era <- textstat_keyness(
+  dfmat_inaug,
+  target = recent,
+  reference = early,
+  measure = "lr"
+)
+textplot_keyness(tstat_era, n = 18, margin = 0.15, color = c("steelblue", "tomato3")) +
+  labs(
+    title = "Keyness: recent inaugurals (2001+) vs. before 1900",
+    subtitle = "Which terms are more characteristic of each era (LR)?"
+  ) +
+  theme_bw(base_size = 12)
+```
+
+```{r}
+#| label: inaugural-party-keyness
+
+# Party contrasts (Democratic vs Republican inaugurals in this corpus)
+party <- docvars(corp_inaug, "Party")
+tstat_party <- textstat_keyness(
+  dfmat_inaug,
+  target = party == "Democratic",
+  measure = "lr"
+)
+textplot_keyness(tstat_party, n = 15, margin = 0.15, color = c("#2171b5", "#cb181d")) +
+  labs(title = "Keyness: Democratic vs. Republican inaugural speeches") +
+  theme_bw(base_size = 12)
+```
+
+**Takeaway.** Inaugurals cluster by president when aggregated, reflecting stable rhetorical habits within a life’s speeches. Keyness separates centuries and parties, surfacing vocabulary that is era-specific (institutions, geopolitics) or aligned with party branding, even though inaugural rhetoric is highly ceremonial.
+
+## Wordfish
+
+## Comparing positions: Wordfish, correspondence analysis, and similarity
+
+-   **Wordfish** gives a **one-dimensional** ideological or emphasis scale with uncertainty and word parameters; good when a single latent dimension dominates (e.g. strategic framing in recurring reports).
+-   **Correspondence analysis** (`textmodel_ca()`) finds **low-dimensional** structure (often two axes for plotting) without a Poisson story; axes are orthogonal and interpretable as association patterns, not necessarily a single “left–right” line.
+-   **Cosine similarity** (`textstat_simil()`) compares whole **document or group profiles** in feature space but does not produce a latent scale; it is complementary for “who looks like whom.”
+
+## US Department of Defense reports (`wordfish02.R`)
+
+```{r}
+#| label: source-wordfish-workshop
+
+wf_script <- if (file.exists("wordfish02.R")) {
+  "wordfish02.R"
+} else {
+  file.path("assignments", "wordfish02.R")
+}
+if (!file.exists(wf_script)) {
+  stop("Cannot find wordfish02.R; expected next to as04.qmd or under assignments/.")
+}
+# Quarto/knitr render is non-interactive: source() defaults print.eval to FALSE
+# (via options(verbose)), so ggplot objects are never printed and no figures appear.
+source(
+  wf_script,
+  encoding = "UTF-8",
+  print.eval = TRUE,
+  local = knitr::knit_global()
+)
+```
